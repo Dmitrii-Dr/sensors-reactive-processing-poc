@@ -7,6 +7,7 @@ import com.dmdr.sensors.message.MeasurementType;
 import com.dmdr.sensors.message.BrokerMessage;
 import com.dmdr.sensors.message.WarehouseSensorBrokerMessage;
 import com.dmdr.sensors.service.MessageProcessorProvider;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.CharsetUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -33,8 +34,8 @@ public final class UdpSensorServer {
                 .host("0.0.0.0")
                 .port(port)
                 .handle((in, out) -> in.receiveObject()
-                        .ofType(io.netty.channel.socket.DatagramPacket.class)
-                        .map(packet -> packet.content().toString(CharsetUtil.UTF_8)) // still on the event loop
+                        .ofType(DatagramPacket.class)
+                        .map(packet -> packet.content().toString(CharsetUtil.UTF_8))
                         .publishOn(PARSER_SCHEDULER)
                         .doOnNext(text -> handle(port, text, type, publisher))
                         .then())
