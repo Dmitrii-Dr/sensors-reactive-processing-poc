@@ -9,4 +9,6 @@ public class ServerConfig {
     private int humiditySensorPort;
     private int temperatureSensorPort;
     private int shutdownTimeoutSec;
+    private String natsUrl;
+    private int queueCapacity;
 }

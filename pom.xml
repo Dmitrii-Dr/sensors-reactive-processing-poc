@@ -14,6 +14,8 @@
         <reactor-netty.version>1.4.0</reactor-netty.version>
         <lombok.version>1.18.48</lombok.version>
         <logback.version>1.5.18</logback.version>
+        <jnats.version>2.20.5</jnats.version>
+        <jackson.version>2.18.2</jackson.version>
     </properties>
 
     <dependencies>
@@ -21,6 +23,21 @@
             <groupId>io.projectreactor.netty</groupId>
             <artifactId>reactor-netty-http</artifactId>
             <version>${reactor-netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nats</groupId>
+            <artifactId>jnats</artifactId>
+            <version>${jnats.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

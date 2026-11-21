@@ -1,8 +1,19 @@
 services:
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"   # client port
+      - "8222:8222"   # monitoring
+    restart: unless-stopped
+
   # Number of instances is set by INSTANCES (see .env)
   sensors-server:
     build: .
     image: sensors-reactive-processing-poc:latest
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      - nats
     expose:
       - "3344/udp"   # humidity sensor
       - "3355/udp"   # temperature sensor
