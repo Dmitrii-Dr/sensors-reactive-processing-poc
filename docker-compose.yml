@@ -1,0 +1,10 @@
+services:
+  sensors-server:
+    build: .
+    image: sensors-reactive-processing-poc:latest
+    container_name: sensors-server
+    ports:
+      - "3344:3344/udp"   # humidity sensor
+      - "3355:3355/udp"   # temperature sensor
+    restart: unless-stopped
+    stop_grace_period: 10s
