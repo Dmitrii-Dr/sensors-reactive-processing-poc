@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Message {
+public abstract class BrokerMessage {
     private final String deviceId;
     private final String value;
     private final MeasurementType type;

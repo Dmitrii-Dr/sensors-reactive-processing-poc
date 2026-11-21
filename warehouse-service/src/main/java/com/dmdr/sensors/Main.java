@@ -4,10 +4,8 @@ import com.dmdr.sensors.broker.MessagePublisher;
 import com.dmdr.sensors.broker.NatsMessagePublisher;
 import com.dmdr.sensors.config.ConfigProviderFactory;
 import com.dmdr.sensors.config.ServerConfig;
-import com.dmdr.sensors.measurement.HumiditySensorMessage;
-import com.dmdr.sensors.measurement.TemperatureSensorMessage;
 import com.dmdr.sensors.message.MeasurementType;
-import com.dmdr.sensors.message.Message;
+import com.dmdr.sensors.message.BrokerMessage;
 import com.dmdr.sensors.server.UdpSensorServer;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -21,7 +19,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ServerConfig serverConfig = ConfigProviderFactory.getInstance().getServerConfig();
 
-        MessagePublisher<Message> publisher = NatsMessagePublisher.connect(
+        MessagePublisher<BrokerMessage> publisher = NatsMessagePublisher.connect(
                 serverConfig.getNatsUrl(), serverConfig.getQueueCapacity());
 
         Mono.zip(

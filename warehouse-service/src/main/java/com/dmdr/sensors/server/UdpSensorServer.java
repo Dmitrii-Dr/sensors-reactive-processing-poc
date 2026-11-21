@@ -4,8 +4,9 @@ import com.dmdr.sensors.broker.MessagePublisher;
 import com.dmdr.sensors.measurement.SensorMessage;
 import com.dmdr.sensors.measurement.SensorMessageParserUtils;
 import com.dmdr.sensors.message.MeasurementType;
-import com.dmdr.sensors.message.Message;
-import com.dmdr.sensors.message.WarehouseSensorMessage;
+import com.dmdr.sensors.message.BrokerMessage;
+import com.dmdr.sensors.message.WarehouseSensorBrokerMessage;
+import com.dmdr.sensors.service.MessageProcessorProvider;
 import io.netty.util.CharsetUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,6 @@ import reactor.netty.Connection;
 import reactor.netty.udp.UdpServer;
 
 import java.time.Instant;
-import java.util.function.BiFunction;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -28,7 +28,7 @@ public final class UdpSensorServer {
 
     public static Mono<? extends Connection> start(int port,
                                                    MeasurementType type,
-                                                   MessagePublisher<Message> publisher) {
+                                                   MessagePublisher<BrokerMessage> publisher) {
         return UdpServer.create()
                 .host("0.0.0.0")
                 .port(port)
@@ -41,19 +41,22 @@ public final class UdpSensorServer {
                 .bind();
     }
 
-    private static void handle(int port, String rawText, MeasurementType type, MessagePublisher<Message> publisher) {
+    private static void handle(int port, String rawText, MeasurementType type, MessagePublisher<BrokerMessage> publisher) {
         String text = rawText.trim();
         SensorMessage sensorMessage = SensorMessageParserUtils.parse(text, type);
         if (sensorMessage == null) {
             log.error("[{}] Failed to parse {} message, dropping datagram: {}", port, type, text);
             return;
         }
-        WarehouseSensorMessage message = new WarehouseSensorMessage(
+        //Dummy call of chain processing for future needs
+        MessageProcessorProvider.getChain().process(sensorMessage);
+
+        BrokerMessage brokerMessage = new WarehouseSensorBrokerMessage(
                 sensorMessage.getSensorId(), sensorMessage.getValue(), type, Instant.now());
 
-        publisher.publish(message);
+        publisher.publish(brokerMessage);
 
         log.debug("[{}] Queued for {}: deviceId={}, value={}",
-                port, type.getTopic(), message.getDeviceId(), message.getValue());
+                port, type.getTopic(), brokerMessage.getDeviceId(), brokerMessage.getValue());
     }
 }

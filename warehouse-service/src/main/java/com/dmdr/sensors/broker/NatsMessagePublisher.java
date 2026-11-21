@@ -1,6 +1,6 @@
 package com.dmdr.sensors.broker;
 
-import com.dmdr.sensors.message.Message;
+import com.dmdr.sensors.message.BrokerMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public final class NatsMessagePublisher implements MessagePublisher<Message> {
+public final class NatsMessagePublisher implements MessagePublisher<BrokerMessage> {
 
     private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(5);
 
@@ -31,7 +31,7 @@ public final class NatsMessagePublisher implements MessagePublisher<Message> {
 
     private final Connection connection;
     private final Scheduler scheduler = Schedulers.newSingle("nats-publisher");
-    private final Sinks.Many<Message> queue = Sinks.many().unicast().onBackpressureBuffer();
+    private final Sinks.Many<BrokerMessage> queue = Sinks.many().unicast().onBackpressureBuffer();
     private final CompletableFuture<Void> finished;
 
     private NatsMessagePublisher(Connection connection, int queueCapacity) {
@@ -58,23 +58,23 @@ public final class NatsMessagePublisher implements MessagePublisher<Message> {
     }
 
     @Override
-    public void publish(Message message) {
+    public void publish(BrokerMessage brokerMessage) {
         Sinks.EmitResult result;
         do {
-            result = queue.tryEmitNext(message);
+            result = queue.tryEmitNext(brokerMessage);
         } while (result == Sinks.EmitResult.FAIL_NON_SERIALIZED);
 
         if (result != Sinks.EmitResult.OK) {
-            log.warn("Publish queue closed ({}), dropping {}", result, message);
+            log.warn("Publish queue closed ({}), dropping {}", result, brokerMessage);
         }
     }
 
-    private void send(Message message) {
+    private void send(BrokerMessage brokerMessage) {
         try {
-            byte[] payload = MAPPER.writeValueAsString(message).getBytes(StandardCharsets.UTF_8);
-            connection.publish(message.getType().getTopic(), payload);
+            byte[] payload = MAPPER.writeValueAsString(brokerMessage).getBytes(StandardCharsets.UTF_8);
+            connection.publish(brokerMessage.getType().getTopic(), payload);
         } catch (JsonProcessingException | RuntimeException e) {
-            log.error("Failed to publish {}", message, e);
+            log.error("Failed to publish {}", brokerMessage, e);
         }
     }
 

@@ -1,5 +1,10 @@
 package com.dmdr.sensors.service;
 
+import com.dmdr.sensors.measurement.SensorMessage;
+
 public interface MessageProcessor {
-    void process();
+
+    MessageProcessor setNext(MessageProcessor next);
+
+    void process(SensorMessage sensorMessage);
 }
