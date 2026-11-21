@@ -12,7 +12,7 @@ public class ValidationProcessor extends AbstractMessageProcessor {
         log.info("ValidationProcessor: processing");
         String sensorId = sensorMessage.getSensorId();
         RegisteredSensors registeredSensors = ConfigProviderFactory.getInstance().getRegisteredSensors();
-        if (!registeredSensors.getSensorIds().contains(sensorId)) {
+        if (!registeredSensors.sensorIds().contains(sensorId)) {
             log.error("Received message from unknown sensor '{}': {}", sensorId, sensorMessage);
             throw new RuntimeException("Received message from unknown sensor");
         }

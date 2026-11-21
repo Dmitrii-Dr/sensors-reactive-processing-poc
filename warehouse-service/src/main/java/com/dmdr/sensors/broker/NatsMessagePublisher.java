@@ -82,7 +82,7 @@ public final class NatsMessagePublisher implements MessagePublisher<BrokerMessag
     public void close() {
         queue.tryEmitComplete();
         try {
-            finished.get(CLOSE_TIMEOUT.toSeconds(), TimeUnit.SECONDS); // wait until the queue is flushed
+            finished.get(CLOSE_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             connection.drain(CLOSE_TIMEOUT).get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

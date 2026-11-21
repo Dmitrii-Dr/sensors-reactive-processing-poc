@@ -36,6 +36,8 @@ public final class UdpSensorServer {
                 .handle((in, out) -> in.receiveObject()
                         .ofType(DatagramPacket.class)
                         .map(packet -> packet.content().toString(CharsetUtil.UTF_8))
+                        .onBackpressureDrop(dropped ->
+                                log.warn("[{}] Parser is overloaded, dropping datagram", port))
                         .publishOn(PARSER_SCHEDULER)
                         .doOnNext(text -> handle(port, text, type, publisher))
                         .then())
@@ -43,6 +45,14 @@ public final class UdpSensorServer {
     }
 
     private static void handle(int port, String rawText, MeasurementType type, MessagePublisher<BrokerMessage> publisher) {
+        try {
+            doHandle(port, rawText, type, publisher);
+        } catch (RuntimeException e) {
+            log.error("[{}] Unexpected error while handling datagram, dropping: {}", port, rawText, e);
+        }
+    }
+
+    private static void doHandle(int port, String rawText, MeasurementType type, MessagePublisher<BrokerMessage> publisher) {
         String text = rawText.trim();
         SensorMessage sensorMessage = SensorMessageParserUtils.parse(text, type);
         if (sensorMessage == null) {
