@@ -23,6 +23,7 @@ public final class UdpSensorServer {
     public static Mono<? extends Connection> start(int port,
                                                    BiFunction<String, String, SensorMessage> factory) {
         return UdpServer.create()
+                .host("0.0.0.0")
                 .port(port)
                 .handle((in, out) -> in.receiveObject()
                         .ofType(io.netty.channel.socket.DatagramPacket.class)
