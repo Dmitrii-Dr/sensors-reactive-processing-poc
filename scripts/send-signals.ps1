@@ -14,7 +14,7 @@ param(
     [string]$TempId = "t1",
     [string]$HumidityId = "h1",
     [int]$RatePerSec = 10,
-    [int]$DurationSec = 60,
+    [int]$DurationSec = 10,
     [double]$TempStart = 20,
     [double]$TempEnd = 45,       # limit is 35
     [double]$HumidityStart = 30,

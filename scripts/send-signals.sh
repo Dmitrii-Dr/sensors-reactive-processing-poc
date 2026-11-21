@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+J#!/usr/bin/env bash
 # Sends 10 UDP signals per second (alternating t1 / h1) with gradually growing values,
 # so that they eventually exceed the alert limits (.env: TEMPERATURE_LIMIT=35, HUMIDITY_LIMIT=50).
 #
@@ -16,7 +16,7 @@ HUMIDITY_PORT="${HUMIDITY_PORT:-3344}"
 TEMP_ID="${TEMP_ID:-t1}"
 HUMIDITY_ID="${HUMIDITY_ID:-h1}"
 RATE_PER_SEC="${RATE_PER_SEC:-10}"
-DURATION_SEC="${DURATION_SEC:-60}"
+DURATION_SEC="${DURATION_SEC:-10}"
 TEMP_START="${TEMP_START:-20}"
 TEMP_END="${TEMP_END:-45}"            # limit is 35
 HUMIDITY_START="${HUMIDITY_START:-30}"
