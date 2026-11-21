@@ -56,7 +56,7 @@ public final class UdpSensorServer {
 
         publisher.publish(brokerMessage);
 
-        log.debug("[{}] Queued for {}: deviceId={}, value={}",
-                port, type.getTopic(), brokerMessage.getDeviceId(), brokerMessage.getValue());
+        log.debug("[{}] Queued for {}: sensorId={}, value={}",
+                port, type.getTopic(), brokerMessage.getSensorId(), brokerMessage.getValue());
     }
 }

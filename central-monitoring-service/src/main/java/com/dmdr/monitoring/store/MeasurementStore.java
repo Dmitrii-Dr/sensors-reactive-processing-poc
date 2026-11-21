@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class MeasurementStore {
 
-    private record Key(String type, String deviceId) {
+    private record Key(String type, String sensorId) {
     }
 
     private final Map<Key, Measurement> latest = new ConcurrentHashMap<>();
