@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Sends 10 UDP signals per second (alternating t1 / h1) with gradually growing values,
-# so that they eventually exceed the alert limits (.env: TEMPERATURE_LIMIT=35, HUMIDITY_LIMIT=50).
+# so that they exceed the alert limits (.env: TEMPERATURE_LIMIT=35, HUMIDITY_LIMIT=50)
+# within DURATION_SEC (10 s by default).
 #
 # Usage:
 #   ./scripts/send-signals.sh
 #   DURATION_SEC=30 TEMP_END=50 ./scripts/send-signals.sh
 #
-# Requires: bash, awk, nc (netcat; preinstalled on macOS)
+# Requires: bash (uses the built-in /dev/udp, no nc needed; works on macOS and Linux), awk
 
 set -euo pipefail
 
@@ -25,21 +26,23 @@ HUMIDITY_END="${HUMIDITY_END:-65}"    # limit is 50
 total=$((RATE_PER_SEC * DURATION_SEC))
 interval=$(awk -v r="$RATE_PER_SEC" 'BEGIN { printf "%.4f", 1 / r }')
 
-for ((i = 0; i < total; i++)); do
-  if ((i % 2 == 0)); then
-    id=$TEMP_ID; port=$TEMP_PORT; start=$TEMP_START; end=$TEMP_END
-  else
-    id=$HUMIDITY_ID; port=$HUMIDITY_PORT; start=$HUMIDITY_START; end=$HUMIDITY_END
-  fi
-
-  value=$(awk -v s="$start" -v e="$end" -v i="$i" -v t="$total" \
-    'BEGIN { p = (t > 1) ? i / (t - 1) : 1; printf "%.1f", s + (e - s) * p }')
-  payload="$id,$value"
-
-  printf '%s\n' "$payload" | nc -u -w 1 "$TARGET_HOST" "$port"
-  printf '[%4d/%d] -> :%s  %s\n' "$((i + 1))" "$total" "$port" "$payload"
-
+# All payloads are computed in a single awk run: "<port> <id>,<value>"
+i=0
+while read -r port payload; do
+  i=$((i + 1))
+  # Built-in UDP send: no external process and no nc timeout
+  printf '%s\n' "$payload" > "/dev/udp/$TARGET_HOST/$port"
+  printf '[%4d/%d] -> :%s  %s\n' "$i" "$total" "$port" "$payload"
   sleep "$interval"
-done
+done < <(awk -v n="$total" \
+  -v tid="$TEMP_ID" -v tport="$TEMP_PORT" -v ts="$TEMP_START" -v te="$TEMP_END" \
+  -v hid="$HUMIDITY_ID" -v hport="$HUMIDITY_PORT" -v hs="$HUMIDITY_START" -v he="$HUMIDITY_END" '
+  BEGIN {
+    for (i = 0; i < n; i++) {
+      p = (n > 1) ? i / (n - 1) : 1
+      if (i % 2 == 0) printf "%s %s,%.1f\n", tport, tid, ts + (te - ts) * p
+      else            printf "%s %s,%.1f\n", hport, hid, hs + (he - hs) * p
+    }
+  }')
 
 echo "Done. Check central-monitoring-service logs for ALERT messages."
