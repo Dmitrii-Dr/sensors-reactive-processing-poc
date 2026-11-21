@@ -1,10 +1,24 @@
 services:
+  # Number of instances is set by INSTANCES (see .env)
   sensors-server:
     build: .
     image: sensors-reactive-processing-poc:latest
-    container_name: sensors-server
-    ports:
-      - "3344:3344/udp"   # humidity sensor
-      - "3355:3355/udp"   # temperature sensor
+    expose:
+      - "3344/udp"   # humidity sensor
+      - "3355/udp"   # temperature sensor
+    deploy:
+      replicas: ${INSTANCES:-1}
     restart: unless-stopped
     stop_grace_period: 10s
+
+  # UDP gateway / round-robin load balancer: 3344 and 3355
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "3344:3344/udp"
+      - "3355:3355/udp"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - sensors-server
+    restart: unless-stopped
