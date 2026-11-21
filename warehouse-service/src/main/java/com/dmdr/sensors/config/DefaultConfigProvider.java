@@ -1,6 +1,6 @@
 package com.dmdr.sensors.config;
 
-public class StaticConfigProvider implements ConfigProvider {
+public class DefaultConfigProvider implements ConfigProvider {
     private static final int HUMIDITY_PORT = 3344;
     private static final int TEMPERATURE_PORT = 3355;
     private static final int SHUTDOWN_TIMEOUT_SEC = 5;

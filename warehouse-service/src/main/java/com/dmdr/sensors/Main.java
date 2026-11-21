@@ -4,7 +4,7 @@ import com.dmdr.sensors.broker.MessagePublisher;
 import com.dmdr.sensors.broker.NatsMessagePublisher;
 import com.dmdr.sensors.config.ConfigProvider;
 import com.dmdr.sensors.config.ServerConfig;
-import com.dmdr.sensors.config.StaticConfigProvider;
+import com.dmdr.sensors.config.EnvConfigProvider;
 import com.dmdr.sensors.measurement.HumiditySensorMessage;
 import com.dmdr.sensors.measurement.TemperatureSensorMessage;
 import com.dmdr.sensors.message.MeasurementType;
@@ -21,7 +21,7 @@ public class Main {
 
 
     public static void main(String[] args) throws Exception {
-        ConfigProvider configProvider = new StaticConfigProvider();
+        ConfigProvider configProvider = new EnvConfigProvider();
         ServerConfig serverConfig = configProvider.getServerConfig();
 
         MessagePublisher publisher = NatsMessagePublisher.connect(

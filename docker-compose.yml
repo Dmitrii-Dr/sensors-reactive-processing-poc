@@ -8,8 +8,10 @@ services:
 
   # Number of instances is set by INSTANCES (see .env)
   sensors-server:
-    build: .
-    image: sensors-reactive-processing-poc:latest
+    build:
+      context: .
+      dockerfile: warehouse-service/Dockerfile
+    image: warehouse-service:latest
     environment:
       NATS_URL: nats://nats:4222
     depends_on:
@@ -19,6 +21,20 @@ services:
       - "3355/udp"   # temperature sensor
     deploy:
       replicas: ${INSTANCES:-1}
+    restart: unless-stopped
+    stop_grace_period: 10s
+
+  central-monitoring-service:
+    build:
+      context: .
+      dockerfile: central-monitoring-service/Dockerfile
+    image: central-monitoring-service:latest
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      - nats
+    ports:
+      - "8080:8080"
     restart: unless-stopped
     stop_grace_period: 10s
 

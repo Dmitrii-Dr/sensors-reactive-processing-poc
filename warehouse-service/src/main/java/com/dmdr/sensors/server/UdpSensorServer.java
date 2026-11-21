@@ -47,17 +47,11 @@ public final class UdpSensorServer {
             return;
         }
         SensorMessage sensorMessage = factory.apply(text.substring(0, idx).trim(), text.substring(idx + 1).trim());
-        int deviceId;
-        try {
-            deviceId = Integer.parseInt(sensorMessage.getSensorId());
-        } catch (NumberFormatException e) {
-            log.warn("[{}] Invalid device id in datagram: {}", port, text);
-            return;
-        }
+
         WarehouseSensorMessage message = new WarehouseSensorMessage(
-                deviceId, sensorMessage.getValue(), type, Instant.now());
+                sensorMessage.getSensorId(), sensorMessage.getValue(), type, Instant.now());
         publisher.publish(message);
-                log.debug("[{}] Queued for {}: deviceId={}, value={}",
+        log.debug("[{}] Queued for {}: deviceId={}, value={}",
                 port, type.getTopic(), message.getDeviceId(), message.getValue());
     }
 }
