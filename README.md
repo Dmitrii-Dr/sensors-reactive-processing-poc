@@ -78,4 +78,5 @@ INSTANCES=3
 
 The Nginx gateway finds the instances through Docker's built-in DNS and distributes incoming UDP datagrams between them using round-robin. Instances that are added or recreated are picked up automatically, without reloading Nginx. 
 
-
+## 5. Target Draft Design
+![img.png](img.png)
