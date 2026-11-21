@@ -15,7 +15,7 @@ public final class MeasurementStore {
     private final Map<Key, Measurement> latest = new ConcurrentHashMap<>();
 
     public void put(Measurement value) {
-        Key key = new Key(value.type(), value.deviceId());
+        Key key = new Key(value.type(), value.sensorId());
         latest.merge(key, value,
                 (old, cur) -> cur.dateTime() != null && old.dateTime() != null
                         && cur.dateTime().isBefore(old.dateTime()) ? old : cur);
@@ -23,7 +23,7 @@ public final class MeasurementStore {
 
     public List<Measurement> snapshot() {
         return latest.values().stream()
-                .sorted(Comparator.comparing(Measurement::type).thenComparing(Measurement::deviceId))
+                .sorted(Comparator.comparing(Measurement::type).thenComparing(Measurement::sensorId))
                 .toList();
     }
 }

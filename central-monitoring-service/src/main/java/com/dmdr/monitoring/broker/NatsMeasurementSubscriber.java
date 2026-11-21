@@ -1,5 +1,6 @@
 package com.dmdr.monitoring.broker;
 
+import com.dmdr.monitoring.alert.AlertMonitor;
 import com.dmdr.monitoring.model.Measurement;
 import com.dmdr.monitoring.store.MeasurementStore;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,13 +27,16 @@ public final class NatsMeasurementSubscriber implements AutoCloseable {
 
     private final Connection connection;
     private final MeasurementStore store;
+    private final AlertMonitor alertMonitor;
 
-    private NatsMeasurementSubscriber(Connection connection, MeasurementStore store) {
+    private NatsMeasurementSubscriber(Connection connection, MeasurementStore store, AlertMonitor alertMonitor) {
         this.connection = connection;
         this.store = store;
+        this.alertMonitor = alertMonitor;
     }
 
-    public static NatsMeasurementSubscriber start(String url, String subject, MeasurementStore store)
+    public static NatsMeasurementSubscriber start(String url, String subject, MeasurementStore store,
+                                                  AlertMonitor alertMonitor)
             throws IOException, InterruptedException {
         Connection connection = Nats.connect(new Options.Builder()
                 .server(url)
@@ -40,7 +44,7 @@ public final class NatsMeasurementSubscriber implements AutoCloseable {
                 .build());
         log.info("Connected to NATS at {}", url);
 
-        NatsMeasurementSubscriber subscriber = new NatsMeasurementSubscriber(connection, store);
+        NatsMeasurementSubscriber subscriber = new NatsMeasurementSubscriber(connection, store, alertMonitor);
         Dispatcher dispatcher = connection.createDispatcher(subscriber::onMessage);
         dispatcher.subscribe(subject);
         log.info("Subscribed to '{}'", subject);
@@ -51,8 +55,10 @@ public final class NatsMeasurementSubscriber implements AutoCloseable {
         try {
             Measurement measurement = MAPPER.readValue(message.getData(), Measurement.class);
             store.put(measurement);
-            log.info("[{}] deviceId={}, value={}, at={}", message.getSubject(),
-                    measurement.deviceId(), measurement.value(), measurement.dateTime());
+            alertMonitor.verify(measurement);
+
+            log.info("[{}] sensorId={}, value={}, at={}", message.getSubject(),
+                    measurement.sensorId(), measurement.value(), measurement.dateTime());
         } catch (IOException | RuntimeException e) {
             log.warn("Skipping malformed message on '{}'", message.getSubject(), e);
         }

@@ -5,5 +5,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Measurement(String deviceId, String value, String type, Instant dateTime) {
+public record Measurement(String sensorId, String value, String type, Instant dateTime) {
 }
