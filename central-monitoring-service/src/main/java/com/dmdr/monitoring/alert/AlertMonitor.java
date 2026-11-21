@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AlertMonitor {
     private final AlertConfiguration configuration;
+    private final NotificationSender notificationSender;
 
     public void verify(Measurement measurement) {
         Limit limit = configuration.getLimit(measurement.sensorId(), measurement.type());
@@ -15,8 +16,7 @@ public class AlertMonitor {
             return;
         }
         if (limitExceeded(limit, measurement.value())) {
-            log.error("ALERT: {} sensorId={} value={} exceeds limit {} at={}",
-                    measurement.type(), measurement.sensorId(), measurement.value(), limit, measurement.dateTime());
+            notificationSender.notify(limit, measurement);
         }
     }
 

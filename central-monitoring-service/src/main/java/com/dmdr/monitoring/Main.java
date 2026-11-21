@@ -2,6 +2,7 @@ package com.dmdr.monitoring;
 
 import com.dmdr.monitoring.alert.AlertConfiguration;
 import com.dmdr.monitoring.alert.AlertMonitor;
+import com.dmdr.monitoring.alert.LogNotificationSender;
 import com.dmdr.monitoring.broker.NatsMeasurementSubscriber;
 import com.dmdr.monitoring.config.MonitoringConfig;
 import com.dmdr.monitoring.server.MonitoringHttpServer;
@@ -18,7 +19,7 @@ public class Main {
         MonitoringConfig config = MonitoringConfig.fromEnv();
         MeasurementStore store = new MeasurementStore();
 
-        AlertMonitor alertMonitor = new AlertMonitor(new AlertConfiguration());
+        AlertMonitor alertMonitor = new AlertMonitor(new AlertConfiguration(), new LogNotificationSender());
 
         NatsMeasurementSubscriber subscriber =
                 NatsMeasurementSubscriber.start(config.natsUrl(), config.subject(), store, alertMonitor);
