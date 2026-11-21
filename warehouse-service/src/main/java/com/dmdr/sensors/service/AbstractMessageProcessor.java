@@ -14,11 +14,11 @@ public abstract class AbstractMessageProcessor implements MessageProcessor {
 
     @Override
     public final void process(SensorMessage sensorMessage) {
-        doProcess();
+        doProcess(sensorMessage);
         if (next != null) {
             next.process(sensorMessage);
         }
     }
 
-    protected abstract void doProcess();
+    protected abstract void doProcess(SensorMessage sensorMessage);
 }

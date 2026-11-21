@@ -14,6 +14,7 @@ services:
     image: warehouse-service:latest
     environment:
       NATS_URL: nats://nats:4222
+      SENSOR_IDS: t1,h1
     depends_on:
       - nats
     expose:

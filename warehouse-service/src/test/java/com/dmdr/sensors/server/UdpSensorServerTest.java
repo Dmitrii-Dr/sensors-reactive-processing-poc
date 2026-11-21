@@ -57,23 +57,23 @@ class UdpSensorServerTest {
 
     @Test
     void servesHumidityPort() throws Exception {
-        send(HUMIDITY_PORT, "sensor-h1,45");
+        send(HUMIDITY_PORT, "h1,45");
 
         BrokerMessage message = received.poll(5, TimeUnit.SECONDS);
         assertNotNull(message, "No message received for port " + HUMIDITY_PORT);
         assertEquals(MeasurementType.HUMIDITY, message.getType());
-        assertEquals("sensor-h1", message.getSensorId());
+        assertEquals("h1", message.getSensorId());
         assertEquals("45", message.getValue());
     }
 
     @Test
     void servesTemperaturePort() throws Exception {
-        send(TEMPERATURE_PORT, "sensor-t1,21");
+        send(TEMPERATURE_PORT, "t1,21");
 
         BrokerMessage message = received.poll(5, TimeUnit.SECONDS);
         assertNotNull(message, "No message received for port " + TEMPERATURE_PORT);
         assertEquals(MeasurementType.TEMPERATURE, message.getType());
-        assertEquals("sensor-t1", message.getSensorId());
+        assertEquals("t1", message.getSensorId());
         assertEquals("21", message.getValue());
     }
 

@@ -50,7 +50,13 @@ public final class UdpSensorServer {
             return;
         }
         //Dummy call of chain processing for future needs
-        MessageProcessorProvider.getChain().process(sensorMessage);
+        try {
+            MessageProcessorProvider.getChain().process(sensorMessage);
+        } catch (RuntimeException e) {
+            log.error("[{}] Message rejected by processing chain, dropping: {} ({})",
+                    port, sensorMessage, e.getMessage());
+            return;
+        }
 
         BrokerMessage brokerMessage = new WarehouseSensorBrokerMessage(
                 sensorMessage.getSensorId(), sensorMessage.getValue(), type, Instant.now());

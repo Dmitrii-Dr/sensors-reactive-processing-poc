@@ -50,12 +50,12 @@ class UdpSensorServerPublishTest {
 
     @Test
     void publishesMessageWhenFormatIsCorrect() throws Exception {
-        send("sensor-t1,21");
+        send("t1,21");
 
         ArgumentCaptor<BrokerMessage> captor = ArgumentCaptor.forClass(BrokerMessage.class);
         verify(publisher, timeout(5000)).publish(captor.capture());
         BrokerMessage message = captor.getValue();
-        assertEquals("sensor-t1", message.getSensorId());
+        assertEquals("t1", message.getSensorId());
         assertEquals("21", message.getValue());
         assertEquals(MeasurementType.TEMPERATURE, message.getType());
     }
@@ -71,9 +71,28 @@ class UdpSensorServerPublishTest {
     @Test
     void wrongDatagramDoesNotBlockSubsequentValidOne() throws Exception {
         send("garbage");
-        send("sensor-t2,30");
+        send("t1,30");
 
         verify(publisher, timeout(5000)).publish(any());
+        verify(publisher, after(300).times(1)).publish(any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"unknown-sensor,21", "sensor-t1,21", "T1,21"})
+    void doesNotPublishMessageFromUnknownSensor(String payload) throws Exception {
+        send(payload);
+
+        verify(publisher, after(500).never()).publish(any());
+    }
+
+    @Test
+    void unknownSensorDoesNotBlockSubsequentKnownOne() throws Exception {
+        send("unknown-sensor,21");
+        send("t1,30");
+
+        ArgumentCaptor<BrokerMessage> captor = ArgumentCaptor.forClass(BrokerMessage.class);
+        verify(publisher, timeout(5000)).publish(captor.capture());
+        assertEquals("t1", captor.getValue().getSensorId());
         verify(publisher, after(300).times(1)).publish(any());
     }
 

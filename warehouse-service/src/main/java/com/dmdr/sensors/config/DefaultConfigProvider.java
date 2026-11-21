@@ -1,5 +1,7 @@
 package com.dmdr.sensors.config;
 
+import java.util.Set;
+
 public class DefaultConfigProvider implements ConfigProvider {
     private static final int HUMIDITY_PORT = 3344;
     private static final int TEMPERATURE_PORT = 3355;
@@ -10,5 +12,10 @@ public class DefaultConfigProvider implements ConfigProvider {
     @Override
     public ServerConfig getServerConfig() {
         return new ServerConfig(HUMIDITY_PORT, TEMPERATURE_PORT, SHUTDOWN_TIMEOUT_SEC, DEFAULT_NATS_URL, PUBLISH_QUEUE_CAPACITY);
+    }
+
+    @Override
+    public RegisteredSensors getRegisteredSensors() {
+        return new RegisteredSensors(Set.of("t1", "h1"));
     }
 }
