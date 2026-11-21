@@ -2,12 +2,12 @@ package com.dmdr.sensors;
 
 import com.dmdr.sensors.broker.MessagePublisher;
 import com.dmdr.sensors.broker.NatsMessagePublisher;
-import com.dmdr.sensors.config.ConfigProvider;
+import com.dmdr.sensors.config.ConfigProviderFactory;
 import com.dmdr.sensors.config.ServerConfig;
-import com.dmdr.sensors.config.EnvConfigProvider;
 import com.dmdr.sensors.measurement.HumiditySensorMessage;
 import com.dmdr.sensors.measurement.TemperatureSensorMessage;
 import com.dmdr.sensors.message.MeasurementType;
+import com.dmdr.sensors.message.Message;
 import com.dmdr.sensors.server.UdpSensorServer;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -18,20 +18,15 @@ import java.time.Duration;
 @Slf4j
 public class Main {
 
-
-
     public static void main(String[] args) throws Exception {
-        ConfigProvider configProvider = new EnvConfigProvider();
-        ServerConfig serverConfig = configProvider.getServerConfig();
+        ServerConfig serverConfig = ConfigProviderFactory.getInstance().getServerConfig();
 
-        MessagePublisher publisher = NatsMessagePublisher.connect(
+        MessagePublisher<Message> publisher = NatsMessagePublisher.connect(
                 serverConfig.getNatsUrl(), serverConfig.getQueueCapacity());
 
         Mono.zip(
-                        UdpSensorServer.start(serverConfig.getHumiditySensorPort(),
-                                HumiditySensorMessage::new, MeasurementType.HUMIDITY, publisher),
-                        UdpSensorServer.start(serverConfig.getTemperatureSensorPort(),
-                                TemperatureSensorMessage::new, MeasurementType.TEMPERATURE, publisher))
+                        UdpSensorServer.start(serverConfig.getHumiditySensorPort(), MeasurementType.HUMIDITY, publisher),
+                        UdpSensorServer.start(serverConfig.getTemperatureSensorPort(), MeasurementType.TEMPERATURE, publisher))
                 .doOnNext(servers -> {
                     registerShutdownHook(serverConfig, publisher, servers.getT1(), servers.getT2());
                     log.info("UDP servers listening: humidity={}, temperature={}",
@@ -43,7 +38,7 @@ public class Main {
                 .block(); // single block only keeps main alive; both binds run in parallel
     }
 
-    private static void registerShutdownHook(ServerConfig serverConfig, MessagePublisher publisher,
+    private static void registerShutdownHook(ServerConfig serverConfig, MessagePublisher<?> publisher,
                                              Connection... connections) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down UDP servers...");

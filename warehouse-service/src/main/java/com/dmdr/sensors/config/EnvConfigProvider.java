@@ -2,16 +2,21 @@ package com.dmdr.sensors.config;
 
 public class EnvConfigProvider implements ConfigProvider {
 
-    private final ServerConfig defaults = new DefaultConfigProvider().getServerConfig();
+    private final ServerConfig serverConfig;
 
-    @Override
-    public ServerConfig getServerConfig() {
-        return new ServerConfig(
+    public EnvConfigProvider() {
+        ServerConfig defaults = new DefaultConfigProvider().getServerConfig();
+        this.serverConfig = new ServerConfig(
                 intEnv("HUMIDITY_PORT", defaults.getHumiditySensorPort()),
                 intEnv("TEMPERATURE_PORT", defaults.getTemperatureSensorPort()),
                 intEnv("SHUTDOWN_TIMEOUT_SEC", defaults.getShutdownTimeoutSec()),
                 strEnv("NATS_URL", defaults.getNatsUrl()),
                 intEnv("PUBLISH_QUEUE_CAPACITY", defaults.getQueueCapacity()));
+    }
+
+    @Override
+    public ServerConfig getServerConfig() {
+        return serverConfig;
     }
 
     private static String strEnv(String name, String fallback) {

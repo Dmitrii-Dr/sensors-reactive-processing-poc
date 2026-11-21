@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public final class NatsMessagePublisher implements MessagePublisher {
+public final class NatsMessagePublisher implements MessagePublisher<Message> {
 
     private static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(5);
 
