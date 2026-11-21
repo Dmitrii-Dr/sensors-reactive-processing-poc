@@ -1,12 +1,13 @@
+# syntax=docker/dockerfile:1.7
 # Build context: repository root
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY warehouse-service/pom.xml warehouse-service/pom.xml
 COPY central-monitoring-service/pom.xml central-monitoring-service/pom.xml
-RUN mvn -B -q -pl warehouse-service -am dependency:go-offline
 COPY warehouse-service/src warehouse-service/src
-RUN mvn -B -q -pl warehouse-service -am package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -q -T 1C -pl warehouse-service -am package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

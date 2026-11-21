@@ -1,4 +1,7 @@
-target/
+**/target
 .idea/
 .git/
 *.iml
+.env
+*.md
+docs/
