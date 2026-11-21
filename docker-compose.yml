@@ -13,8 +13,12 @@ services:
       dockerfile: warehouse-service/Dockerfile
     image: warehouse-service:latest
     environment:
-      NATS_URL: nats://nats:4222
-      SENSOR_IDS: t1,h1
+      NATS_URL: ${NATS_URL:-nats://nats:4222}
+      SENSOR_IDS: ${SENSOR_IDS:-t1,h1}
+      HUMIDITY_PORT: ${HUMIDITY_PORT:-3344}
+      TEMPERATURE_PORT: ${TEMPERATURE_PORT:-3355}
+      SHUTDOWN_TIMEOUT_SEC: ${SHUTDOWN_TIMEOUT_SEC:-5}
+      PUBLISH_QUEUE_CAPACITY: ${PUBLISH_QUEUE_CAPACITY:-10000}
     depends_on:
       - nats
     expose:
@@ -31,7 +35,11 @@ services:
       dockerfile: central-monitoring-service/Dockerfile
     image: central-monitoring-service:latest
     environment:
-      NATS_URL: nats://nats:4222
+      NATS_URL: ${NATS_URL:-nats://nats:4222}
+      NATS_SUBJECT: ${NATS_SUBJECT:-sensors.>}
+      HTTP_PORT: ${HTTP_PORT:-8080}
+      TEMPERATURE_LIMIT: ${TEMPERATURE_LIMIT:-35}
+      HUMIDITY_LIMIT: ${HUMIDITY_LIMIT:-50}
     depends_on:
       - nats
     ports:
